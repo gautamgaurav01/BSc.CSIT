@@ -1,51 +1,56 @@
-// LAB_04 Restoring Division Algorithm
+
+// LAB_05 Non-Restoring Division
 
 #include <iostream>
 #include <bitset>
 using namespace std;
 
-int A = 0; // Accumulator
-int Q;     // Dividend / Quotient
-int M;     // Divisor
-int n = 4; // number of bits
+int A = 0, Q, M;
+int n = 4;
 
-// Function to shift left (A,Q)
 void shiftLeft()
 {
     A = A << 1;
-    if (Q & 8) // MSB of Q moves to LSB of A
+
+    if (Q & 8)
         A = A | 1;
 
-    Q = (Q << 1) & 15; // Keep Q as 4 bits
+    Q = (Q << 1) & 15;
 
     cout << "\nAfter SHIFT LEFT";
     cout << "\nA: " << bitset<5>(A) << "  Q: " << bitset<5>(Q);
 }
 
-// Function to subtract M from A and restore if negative
-void subtractRestore()
+void operation()
 {
-    A = A - M;
-    cout << "\nAfter A = A - M";
-    cout << "\nA: " << bitset<5>(A);
-
-    if (A < 0)
+    if (A >= 0)
     {
-        cout << "\nA negative -> Restore";
-        Q = Q & 14; // Q0 = 0
-        A = A + M;
+        A = A - M;
+        cout << "\nA >= 0 -> A = A - M";
     }
     else
     {
-        cout << "\nA positive -> Q0 = 1";
-        Q = Q | 1; // Q0 = 1
+        A = A + M;
+        cout << "\nA < 0 -> A = A + M";
     }
 
-    cout << "\nA: " << bitset<5>(A) << "  Q: " << bitset<5>(Q) << endl;
+    cout << "\nA: " << bitset<5>(A);
+
+    if (A >= 0)
+    {
+        Q = Q | 1;
+        cout << "\nSet Q0 = 1";
+    }
+    else
+    {
+        Q = Q & 14;
+        cout << "\nSet Q0 = 0";
+    }
+
+    cout << "\nA: " << bitset<5>(A) << "  Q: " << bitset<5>(Q);
 }
 
-// Function to perform the restoring division steps
-void restoringDivision()
+void nonRestoringDivision()
 {
     for (int i = 0; i < n; i++)
     {
@@ -53,13 +58,21 @@ void restoringDivision()
         cout << "\nStep " << i + 1;
 
         shiftLeft();
-        subtractRestore();
+        operation();
+
+        cout << endl;
+    }
+
+    if (A < 0)
+    {
+        cout << "\nA negative -> Final Restore (A = A + M)";
+        A = A + M;
     }
 }
 
 int main()
 {
-    cout << "\n\t***** RESTORING DIVISION *****\n";
+    cout << "\n\t***** NON-RESTORING DIVISION *****\n";
 
     cout << "\nEnter dividend (<16): ";
     cin >> Q;
@@ -69,7 +82,7 @@ int main()
 
     if (M == 0)
     {
-        cout << "\nDivision by zero is not allowed.\n";
+        cout << "Division by zero not allowed";
         return 0;
     }
 
@@ -84,7 +97,7 @@ int main()
     cout << "Q: " << bitset<5>(Q) << endl;
     cout << "M: " << bitset<5>(M) << endl;
 
-    restoringDivision(); // Run the algorithm
+    nonRestoringDivision();
 
     cout << "\n============================";
     cout << "\nFinal Quotient  : " << bitset<5>(Q);

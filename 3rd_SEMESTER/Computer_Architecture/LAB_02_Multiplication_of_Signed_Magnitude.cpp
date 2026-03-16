@@ -1,154 +1,151 @@
-//LAB_02 Multiplication of Signed Magnitude
+// LAB_02: Signed Magnitude Multiplication Algorithm using Functions
 #include <iostream>
-#include <math.h>
+#include <cmath>
+#include <bitset>
+using namespace std;
 
-int q = 0, b = 0, c = 0, e = 0, q1 = 0, b1 = 0;
-int qnum[4] = {0}, bnum[4] = {0};
-int acc[4] = {0}, res[4] = {0};
-int sc = 0, bs = 0, qs = 0, asize = 0;
+int Q, B;           // Multiplicand (B) and Multiplier (Q)
+int ACC[4] = {0};   // Accumulator
+int B_bin[4] = {0}; // Binary of B
+int Q_bin[4] = {0}; // Binary of Q
+int RES[4] = {0};
+int C = 0, E = 0;
+int SC = 0; // Step counter
 
-void binary()
+// Convert decimal to 4-bit binary arrays
+void toBinary()
 {
-    b1 = fabs(b);
-    q1 = fabs(q);
-    int r1, r2, i;
-    for (i = 0; i < 4; i++)
-    {
-        r1 = b1 % 2;
-        b1 = b1 / 2;
-        r2 = q1 % 2;
-        q1 = q1 / 2;
-        bnum[i] = r1;
-        qnum[i] = r2;
-    }
-    sc = sizeof(qnum) / sizeof(int);
+    int b_abs = abs(B);
+    int q_abs = abs(Q);
 
-    asize = sc;
+    for (int i = 0; i < 4; i++)
+    {
+        B_bin[i] = b_abs % 2;
+        b_abs /= 2;
+        Q_bin[i] = q_abs % 2;
+        q_abs /= 2;
+    }
+    SC = 4; // number of bits
 }
 
-void add(int num[])
+// Add binary B to ACC
+void addBtoACC()
 {
-    int i;
-    c = 0;
-    for (i = 0; i < 4; i++)
+    C = 0;
+    for (int i = 0; i < 4; i++)
     {
-        res[i] = acc[i] + num[i] + c;
-        if (res[i] >= 2)
+        RES[i] = ACC[i] + B_bin[i] + C;
+        if (RES[i] >= 2)
+            C = 1;
+        else
+            C = 0;
+        E = C;
+        RES[i] %= 2;
+    }
+
+    // Update ACC
+    for (int i = 0; i < 4; i++)
+        ACC[i] = RES[i];
+
+    // Print step
+    cout << "  ACC: ";
+    for (int i = 3; i >= 0; i--)
+        cout << ACC[i];
+    cout << " : Q: ";
+    for (int i = 3; i >= 0; i--)
+        cout << Q_bin[i];
+    cout << endl;
+}
+
+// Right shift ACC and Q
+void rShift()
+{
+    int temp = ACC[0];
+    for (int i = 0; i < 3; i++)
+        ACC[i] = ACC[i + 1];
+    ACC[3] = E;
+    E = 0;
+
+    for (int i = 0; i < 3; i++)
+        Q_bin[i] = Q_bin[i + 1];
+    Q_bin[3] = temp;
+
+    // Print step
+    cout << "  R-SHIFT: ACC: ";
+    for (int i = 3; i >= 0; i--)
+        cout << ACC[i];
+    cout << " : Q: ";
+    for (int i = 3; i >= 0; i--)
+        cout << Q_bin[i];
+    cout << endl;
+}
+
+// Main multiplication process
+void multiply()
+{
+    while (SC != 0)
+    {
+        cout << "Step SC=" << SC << " -> ";
+        if (Q_bin[0] == 1)
         {
-            c = 1;
+            cout << "Adding B to ACC" << endl;
+            addBtoACC();
         }
         else
         {
-            c = 0;
+            cout << "No addition, just shift" << endl;
         }
-        e = c;
-        res[i] = res[i] % 2;
-    }
-
-    for (i = 3; i >= 0; i--)
-    {
-        acc[i] = res[i];
-        printf("%d", acc[i]);
-    }
-    printf(" : ");
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", qnum[i]);
+        rShift();
+        SC--;
+        cout << endl;
     }
 }
-void rshift()
-{
-    int temp2 = acc[0], i;
-    for (i = 1; i < 4; i++)
-    {
-        acc[i - 1] = acc[i];
-    }
-    acc[3] = e;
-    e = 0;
-    for (i = 1; i < 4; i++)
-    {
-        qnum[i - 1] = qnum[i];
-    }
-    qnum[3] = temp2;
 
-    printf("\n R-SHIFT: ");
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", acc[i]);
-    }
-    printf(":");
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", qnum[i]);
-    }
-}
 int main()
 {
-    int i;
-    int p = 0, n = 1;
-    printf("\t\t******SIGNED MAGNITUDE MULTIPLICATION ALGORITHM******\n");
-    printf("\nEnter two numbers to multiply: ");
-    printf("\nBoth must be less than 16");
-    do
-    {
-        printf("\nEnter b: ");
-        scanf("%d", &b);
-        printf("Enter Q: ");
-        scanf("%d", &q);
-    } while (b >= 16 || q >= 16);
+    cout << "\t\t****** SIGNED MAGNITUDE MULTIPLICATION ******\n\n";
 
-    printf("\n Expected product = %d", b * q);
-    binary();
+    cout << "Enter multiplicand B (<16): ";
+    cin >> B;
+    cout << "Enter multiplier Q (<16): ";
+    cin >> Q;
 
-    printf("\nS.C. = %d", sc);
+    int expected = B * Q;
+    cout << "\nExpected Product = " << expected << endl;
 
-    printf("\n\n Signed Binary Equivalents are: ");
-    printf("\n b = ");
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", bnum[i]);
-    }
+    toBinary();
 
-    printf("\n q = ");
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", qnum[i]);
-    }
-    printf("\n\n");
+    cout << "\nBinary Equivalents:" << endl;
+    cout << "B: ";
+    for (int i = 3; i >= 0; i--)
+        cout << B_bin[i];
+    cout << "\nQ: ";
+    for (int i = 3; i >= 0; i--)
+        cout << Q_bin[i];
+    cout << "\n\n";
 
-    while (sc != 0)
-    {
-        printf("\nS.C. = %d", sc);
-        if (qnum[0] == 0)
-        {
-            printf("\n-->");
-            rshift();
-        }
-        else
-        {
-            printf("\n-->");
-            printf("\n ADD B: ");
-            add(bnum);
-            rshift();
-        }
-        sc--;
-    }
+    multiply();
 
-    printf("\nproduct is = ");
+    // Print final product in binary
+    cout << "Final Product (Binary): ";
+    if ((B < 0 && Q > 0) || (B > 0 && Q < 0))
+        cout << "-"; // signed magnitude
+    for (int i = 3; i >= 0; i--)
+        cout << ACC[i];
+    for (int i = 3; i >= 0; i--)
+        cout << Q_bin[i];
+    cout << endl;
 
-    if ((b < 0 && q > 0) || (b > 0 && q < 0))
-        printf("%d", n);
-    else
-        printf("%d", p);
+    // Print final product in decimal
+    int binary_product = 0;
+    for (int i = 0; i < 4; i++)
+        binary_product = binary_product * 2 + ACC[i];
+    for (int i = 0; i < 4; i++)
+        binary_product = binary_product * 2 + Q_bin[i];
 
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", acc[i]);
-    }
-    for (i = 3; i >= 0; i--)
-    {
-        printf("%d", qnum[i]);
-    }
+    int final_product = ((B < 0) ^ (Q < 0)) ? -binary_product : binary_product;
+
+    cout << "Final Product (Decimal): " << final_product << endl;
 
     return 0;
 }
